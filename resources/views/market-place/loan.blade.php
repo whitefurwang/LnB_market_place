@@ -1,9 +1,9 @@
 @extends('layouts.default')
 
-@section('title', 'Item')
+@section('title', 'Loan')
 
 @section('content')
-  <router-link to="/list" exact>List</router-link>
+  <router-link to="/market-place" exact>List</router-link>
   <router-view/>
 @endsection
 

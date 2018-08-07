@@ -1,13 +1,13 @@
 <template>
   <div>
-    <div>Item {{ $route.params.id }}</div>
+    <div>Loan {{ $route.params.serial }}</div>
   </div>
 </template>
 
 <script>
   export default {
     mounted() {
-      console.log('Item')
+      console.log('Loan')
     }
   }
 </script>

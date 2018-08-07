@@ -3,12 +3,12 @@
     <ul>
       <li v-for="n in 10">
         <router-link
-          :to="{ path: '/list/item/' + n }"
+          :to="{ path: '/market-place/loan/' + n }"
           @click="showModal = true"
-        >Item {{n}}</router-link>
+        >Loan {{n}}</router-link>
       </li>
     </ul>
-    <div>List</div>
+    <div>Market Place</div>
     <router-view/>
   </div>
 </template>
@@ -16,7 +16,7 @@
 <script>
   export default {
     mounted() {
-      console.log('List')
+      console.log('Market Place')
     }
   }
 </script>

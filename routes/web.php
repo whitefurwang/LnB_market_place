@@ -1,13 +1,13 @@
 <?php
 
 Route::get('/', function () {
-    return redirect('/list');
+    return redirect('/market-place');
 });
 
-Route::get('/list', function () {
-    return view('list/index');
+Route::get('/market-place', function () {
+    return view('market-place/index');
 });
 
-Route::get('/list/item/{serial}', function () {
-    return view('list/item');
+Route::get('/market-place/loan/{serial}', function () {
+    return view('market-place/loan');
 });

@@ -1,6 +1,6 @@
 import VueRouter from 'vue-router'
-import List from './components/List'
-import Item from './components/Item'
+import MarketPlace from './components/MarketPlace'
+import Loan from './components/Loan'
 
 require('./bootstrap')
 
@@ -10,18 +10,18 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/list',
-    component: List,
+    path: '/market-place',
+    component: MarketPlace,
     children: [
       {
-        path: 'item/:id',
-        component: Item,
+        path: 'loan/:serial',
+        component: Loan,
         beforeEnter (to, from, next) {
-          if (from.path == '/list') {
+          if (from.path == '/market-place') {
             next()
           } else {
             next({
-              name: 'item',
+              name: 'loan',
               params: to.params
             })
           }
@@ -30,9 +30,9 @@ const routes = [
     ]
   },
   {
-    path: '/list/item/:id',
-    name: 'item',
-    component: Item
+    path: '/market-place/loan/:serial',
+    name: 'loan',
+    component: Loan
   },
   {
     path: '*',
