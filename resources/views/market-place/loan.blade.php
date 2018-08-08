@@ -3,7 +3,7 @@
 @section('title', 'Loan')
 
 @section('content')
-  <router-link to="/market-place" exact>List</router-link>
+  <router-link to="/market-place" exact>Market Place</router-link>
   <router-view/>
 @endsection
 

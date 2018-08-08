@@ -18,7 +18,7 @@ const routes = [
         path: 'loan/:serial',
         component: Loan,
         beforeEnter (to, from, next) {
-          if (from.path === '/market-place') {
+          if (from.path === '/market-place' || from.path === '/market-place/') {
             next()
           } else {
             next({
