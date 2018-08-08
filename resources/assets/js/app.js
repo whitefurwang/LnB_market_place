@@ -1,6 +1,7 @@
 import VueRouter from 'vue-router'
 import MarketPlace from './components/MarketPlace'
 import Loan from './components/Loan'
+import store from './store'
 
 require('./bootstrap')
 
@@ -17,7 +18,7 @@ const routes = [
         path: 'loan/:serial',
         component: Loan,
         beforeEnter (to, from, next) {
-          if (from.path == '/market-place') {
+          if (from.path === '/market-place') {
             next()
           } else {
             next({
@@ -47,6 +48,7 @@ const router = new VueRouter({
 
 const app = new Vue({
   router,
+  store,
   data: {
     showModal: false
   }

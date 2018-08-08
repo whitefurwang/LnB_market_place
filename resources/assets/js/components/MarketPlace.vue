@@ -1,11 +1,14 @@
 <template>
   <div>
-    <ul>
-      <li v-for="n in 10">
+    <ul v-if="items && items.length">
+      <li
+        v-for="item of items"
+        :key="item.serial"
+      >
         <router-link
-          :to="{ path: '/market-place/loan/' + n }"
+          :to="{ path: '/market-place/loan/' + item.serial }"
           @click="showModal = true"
-        >Loan {{n}}</router-link>
+        >Loan {{item.serial}}</router-link>
       </li>
     </ul>
     <div>Market Place</div>
@@ -15,6 +18,11 @@
 
 <script>
   export default {
+    data () {
+      return {
+        items: this.$store.state.data.data
+      }
+    },
     mounted() {
       console.log('Market Place')
     }
