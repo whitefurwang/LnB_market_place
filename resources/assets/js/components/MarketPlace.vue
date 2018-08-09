@@ -93,6 +93,7 @@
 
         const showModalBackdrop = new Promise (resolve => {
           this.modal_backdrop.show = true
+          $('body').addClass('modal-open')
           setTimeout(() => {
             this.modal_backdrop.class = 'show'
             setTimeout(resolve, 100)
@@ -109,6 +110,7 @@
       modalHide: function (next) {
         const hideModal = new Promise (resolve => {
           this.modal.class = ''
+          $('body').removeClass('modal-open')
           setTimeout(resolve, 150)
         })
 

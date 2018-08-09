@@ -1,14 +1,16 @@
 const getTimeout = expireAt => {
+  const arrExpireAt = expireAt.split('-')
   const nowDate = new Date()
-  const endDate = new Date(`${expireAt} 24:00`)
+  const endDate = new Date(arrExpireAt[0], arrExpireAt[1] - 1, arrExpireAt[2], 24)
   const spantime = (endDate - nowDate) / 1000
   const sesc = Math.floor(spantime % 60)
   return sesc + 1
 }
 
 const getExpiration = expireAt => {
+  const arrExpireAt = expireAt.split('-')
   const nowDate = new Date()
-  const endDate = new Date(`${expireAt} 24:00`)
+  const endDate = new Date(arrExpireAt[0], arrExpireAt[1] - 1, arrExpireAt[2], 24)
   const spantime = (endDate - nowDate) / 1000
   const days = Math.floor(spantime / (24 * 3600))
   const hours = Math.floor((spantime % (24 * 3600)) / 3600)
@@ -36,7 +38,7 @@ const setExpiration = node => {
         if (node.expiration === 'expired') {
           clearInterval(interval)
         }
-      }, 1000)
+      }, 1000 * 60)
     }
   }, getTimeout(node.data.expire_at) * 1000)
 }
