@@ -1,10 +1,5 @@
 <template>
-  <div>
-    <router-link
-      v-if="this.$attrs.isModal"
-      :to="{ path: '/market-place' }"
-      @click="showModal = false"
-    >close</router-link>
+  <div class="loan-container">
     <div class="overview">
       <h1>投資案詳細內容</h1>
       <p>利率 {{ data.loan_detail.credit_level}} {{ data.loan_detail.apr}}%</p> 
@@ -52,16 +47,6 @@
     },
     mounted () {
       setExpiration(this)
-    },
-    beforeRouteUpdate (to, from, next) {
-      const nextItemData = searchData(
-        'serial',
-        to.params.serial,
-        this.$store.state.data.data
-      )
-      this.data = nextItemData
-      this.expiration = getExpiration(nextItemData.expire_at)
-      next()
     }
   }
 </script>

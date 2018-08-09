@@ -48,8 +48,5 @@ const router = new VueRouter({
 
 const app = new Vue({
   router,
-  store,
-  data: {
-    showModal: false
-  }
+  store
 }).$mount('#app')

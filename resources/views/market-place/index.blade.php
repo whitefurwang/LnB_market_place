@@ -3,7 +3,18 @@
 @section('title', 'Market Place')
 
 @section('content')
-  <router-link to="/market-place" exact>Market Place</router-link>
+  <nav class='navbar navbar-expand-lg navbar-light bg-light'>
+    <div class="collapse navbar-collapse">
+      <div class="navbar-nav">
+        <router-link
+          to="/market-place"
+          exact
+          class='nav-item nav-link'
+          linkActiveClass='active'
+        >Market Place</router-link>
+      </div>
+    </div>
+  </nav>
   <router-view/>
 @endsection
 
