@@ -6,7 +6,7 @@
   @include('includes.header')
   <div class="container-fluid">
     <div class="row">
-      <main class="col">
+      <main class="col pt-md-3 pb-md-3">
         <router-view/>
       </main>
     </div>

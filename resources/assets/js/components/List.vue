@@ -1,6 +1,6 @@
 <template>
-  <table v-if="now_list && now_list.length" class='table table-hover'>
-    <thead>
+  <table v-if="now_list && now_list.length" class='table table-hover text-center'>
+    <thead class='thead-light'>
       <tr>
         <th class="sort" data-sort='apr' @click='sort_items'>
           <span>年利率</span>
@@ -44,6 +44,7 @@
       <router-link
         tag='tr'
         v-for="item of now_list"
+        v-bind:class='{ not_on_sale: item.data.status !== "on_sale" }'
         :key="item.data.serial"
         :to="{ path: '/market-place/loan/' + item.data.serial }"
         data-toggle="modal"
@@ -54,7 +55,9 @@
             credit_level_a: /^a/i.test(item.data.loan_detail.credit_level),
             credit_level_b: /^b/i.test(item.data.loan_detail.credit_level),
             credit_level_c: /^c/i.test(item.data.loan_detail.credit_level)
-          }'>{{ item.data.loan_detail.credit_level }}</span> {{ item.data.loan_detail.apr.toFixed(2) }}%</td>
+          }'>{{ item.data.loan_detail.credit_level }}</span>
+          <span class='credit_text'>{{ item.data.loan_detail.apr.toFixed(2) }}%</span>
+        </td>
         <td class='align-middle'>{{ item.data.loan_detail.period }}期</td>
         <td class='align-middle'>{{ item.data.loan_detail.purpose }}</td>
         <td class='align-middle'>{{ item.data.loan_detail.pgr.toFixed(2) }}%</td>

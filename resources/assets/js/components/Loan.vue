@@ -34,29 +34,36 @@
     data () {
       return {
         data: null,
-        expiration: null,
-        errors: []
+        expiration: null
       }
     },
     mounted () {
       if (!!this.$route.params.serial) {
-        axios
-          .get('//localhost:9090/market-place')
-          .then(res => res.data)
-          .then(market_place => {
+        const self = this
+        $.ajax({
+          type: 'GET',
+          url: 'https://paris.robowebtech.tw/api/market-place',
+          // url: '//localhost:3000/market-place',
+          data: {
+            page: 1,
+            perPage: 100
+          },
+          dataType: 'json',
+          success: function (result) {
             const item_data = search_data(
               'serial',
-              this.$route.params.serial,
-              market_place.data.data
+              self.$route.params.serial,
+              result.data
             )
-            
-            this.data = item_data
-            this.expiration = get_expiration(item_data.expire_at)
-            set_expiration(this)
-          })
-          .catch(e => {
-            this.errors.push(e)
-          })
+
+            self.data = item_data
+            self.expiration = get_expiration(item_data.expire_at)
+            set_expiration(self)
+          },
+          error: function (e) {
+            window.alert(e)
+          }
+        })
       }
     },
     methods: {

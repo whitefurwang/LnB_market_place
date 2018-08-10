@@ -27,6 +27,8 @@
         opacity: 1
       .icon-sort-down
         opacity: 0
+  tbody tr.not_on_sale
+    opacity: 0.375
 .credit_level
   display: inline-block
   width: 24px
@@ -37,11 +39,14 @@
   margin-right: 3px
   font-size: 12px
   &.credit_level_a
-    background-color: #81bea5
+    background-color: #97b6d2
   &.credit_level_b
-    background-color: #a1c2df
+    background-color: #81bea5
   &.credit_level_c
     background-color: #e2ba61
+.credit_text
+  display: inline-block
+  width: 4em
 
 .sort-icons
   display: inline-block
@@ -53,7 +58,7 @@
   display: block
   position: absolute
   left: 0
-  opacity: 0.2
+  opacity: 0.275
   &:before
     content: ''
     display: block
@@ -90,7 +95,8 @@
 .go-to-page
   .form-control
     display: inline-block
-    width: auto
+    text-align: center
+    width: 56px
   button
     vertical-align: top
 .per-page .custom-select
