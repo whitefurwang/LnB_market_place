@@ -1,7 +1,6 @@
 import VueRouter from 'vue-router'
 import MarketPlace from './components/MarketPlace'
 import Loan from './components/Loan'
-import store from './store'
 
 require('./bootstrap')
 
@@ -43,10 +42,10 @@ const routes = [
 
 const router = new VueRouter({
   mode: 'history',
+  linkActiveClass: 'active',
   routes
 })
 
 const app = new Vue({
-  router,
-  store
+  router
 }).$mount('#app')

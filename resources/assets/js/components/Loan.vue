@@ -1,9 +1,9 @@
 <template>
-  <div class="loan-container">
+  <div class="loan-container" v-if='data'>
     <div class="overview">
       <h1>投資案詳細內容</h1>
-      <p>利率 {{ data.loan_detail.credit_level}} {{ data.loan_detail.apr}}%</p> 
-      <p>總申貸金額 NT$ {{ data.amount }}</p>
+      <p>利率 {{ data.loan_detail.credit_level}} {{ data.loan_detail.apr.toFixed(2) }}%</p> 
+      <p>總申貸金額 NT$ {{ commafy(data.amount) }}</p>
     </div>
     <div class="loan-info">
       <h2>申貸資訊</h2>
@@ -12,7 +12,7 @@
       <p v-else-if="expiration.days === 0 && expiration.hours === 0 && expiration.mins === 0">下架倒數 少於1分</p>
       <p v-else>下架倒數 {{ expiration.days }}天 {{ expiration.hours }}時 {{ expiration.mins }}分</p>
       <p>期數(月) {{ data.loan_detail.period }}期</p>
-      <p>保護比例 {{ data.loan_detail.pgr }}%</p>
+      <p>保護比例 {{ data.loan_detail.pgr.toFixed(2) }}%</p>
       <p>申貸目的 {{ data.loan_detail.purpose }}</p>
     </div>
     <div class="description">
@@ -23,30 +23,49 @@
 </template>
 
 <script>
-  import { getExpiration, setExpiration } from '../util'
-
-  const searchData = (key, value, array) => {
-    for (let i = 0; i < array.length; i++) {
-      if (array[i][key] === value) {
-        return array[i]
-      }
-    }
-  }
+  import {
+    search_data,
+    get_expiration,
+    set_expiration,
+    commafy
+  } from '../util'
 
   export default {
     data () {
-      const itemData = searchData(
-        'serial',
-        this.$route.params.serial,
-        this.$store.state.data.data
-      )
       return {
-        data: itemData,
-        expiration: getExpiration(itemData.expire_at)
+        data: null,
+        expiration: null,
+        errors: []
       }
     },
     mounted () {
-      setExpiration(this)
+      if (!!this.$route.params.serial) {
+        axios
+          .get('//localhost:9090/market-place')
+          .then(res => res.data)
+          .then(market_place => {
+            const item_data = search_data(
+              'serial',
+              this.$route.params.serial,
+              market_place.data.data
+            )
+            
+            this.data = item_data
+            this.expiration = get_expiration(item_data.expire_at)
+            set_expiration(this)
+          })
+          .catch(e => {
+            this.errors.push(e)
+          })
+      }
+    },
+    methods: {
+      update_data (item) {
+        this.data = item.data
+        this.expiration = item.expiration
+        set_expiration(this)
+      },
+      commafy
     }
   }
 </script>

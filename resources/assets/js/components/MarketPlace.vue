@@ -1,128 +1,203 @@
 <template>
   <div>
-    <table v-if="items && items.length" class='table table-hover'>
-      <thead>
-        <tr>
-          <th>年利率</th>
-          <th>期數</th>
-          <th>貸款目的</th>
-          <th>保護比例</th>
-          <th>下架倒數</th>
-          <th>投資</th>
-        </tr>
-      </thead>
-      <tbody>
-        <router-link
-          tag='tr'
-          v-for="item of items"
-          :key="item.data.serial"
-          :to="{ path: '/market-place/loan/' + item.data.serial }">
-          <td>{{ item.data.loan_detail.credit_level }} {{ item.data.loan_detail.apr }}%</td>
-          <td>{{ item.data.loan_detail.period }}期</td>
-          <td>{{ item.data.loan_detail.purpose }}</td>
-          <td>{{ item.data.loan_detail.pgr }}%</td>
-          <td v-if="item.expiration === 'expired'">已截止</td>
-          <td v-else-if="item.expiration.days === 0 && item.expiration.hours === 0 && item.expiration.mins === 0">少於1分</td>
-          <td v-else>{{ item.expiration.days }}天 {{ item.expiration.hours }}時 {{ item.expiration.mins }}分</td>
-          <td>我要投資</td>
-        </router-link>
-      </tbody>
-    </table>
-    <router-link
-      tag='div'
-      to='/market-place'
-      class='modal fade'
-      v-bind:class='modal.class'
-      v-bind:style='{ display: modal.display}'>
-      <div class='modal-dialog'>
-        <div class='modal-content' @click.stop>
-          <div class="modal-body">
-            <router-link class='close' to='/market-place'>close</router-link>
-            <router-view />
-          </div>
-        </div>
-      </div>
-    </router-link>
-    <div
-      v-if='modal_backdrop.show === true'
-      class='modal-backdrop fade'
-      v-bind:class='modal_backdrop.class'
+    <List
+      v-if="now_list && now_list.length"
+      :now_list='now_list'
+      :sort_items='sort_items'
     />
+    <Modal>
+      <div slot='body' class="modal-body">
+        <button
+          type='button'
+          class='close'
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <Loan ref="loan"/>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
-  import { getExpiration, setExpiration } from '../util'
+  import axios from 'axios'
+  import {
+    search_data,
+    get_expiration,
+    set_expiration
+  } from '../util'
+  import List from './List'
+  import Modal from './Modal'
+  import Loan from './Loan'
 
   export default {
     data () {
-      const storeData = this.$store.state.data.data
-      const items = storeData.map(itemData => {
-        return {
-          data: itemData,
-          expiration: getExpiration(itemData.expire_at)
-        }
-      })
       return {
-        items,
-        modal: {
-          class: '',
-          display: 'none'
-        },
-        modal_backdrop: {
-          show: false,
-          class: ''
-        }
+        data: {},
+        now_list: {},
+        now_item: {},
+        sort_rule: null,
+        sorted_items: {},
+        errors: []
       }
     },
+    created () {
+      axios
+        .get('//localhost:9090/market-place')
+        .then(res => res.data)
+        .then(market_place => {
+          this.data = market_place.data
+          this.now_list = this.create_now_list(this.classify_items(this.data.data))
+          this.now_list.map(item => {
+            set_expiration(item)
+          })
+        })
+        .catch(e => {
+          this.errors.push(e)
+        })
+    },
     mounted () {
-      this.items.map(item => {
-        setExpiration(item)
+      $(this.$refs.modal).on('hidden.bs.modal', () => {
+        this.$router.push('/market-place')
       })
     },
     beforeRouteUpdate (to, from, next) {
       if (from.params.serial) {
-        this.modalHide(next)
+        $(this.$refs.modal).modal('hide')
+        next()
       } else {
-        this.modalShow(next)
+        this.set_now_item(to.params.serial)
+        $(this.$refs.modal).modal('show')
+        next()
       }
     },
     methods: {
-      modalShow: function (next) {
-        next()
+      set_now_item: function (serial) {
+        const item_data = search_data(
+          'serial',
+          serial,
+          this.data.data
+        )
+        this.now_item = {
+          data: item_data,
+          expiration: get_expiration(item_data.expire_at)
+        }
 
-        const showModalBackdrop = new Promise (resolve => {
-          this.modal_backdrop.show = true
-          $('body').addClass('modal-open')
-          setTimeout(() => {
-            this.modal_backdrop.class = 'show'
-            setTimeout(resolve, 100)
-          }, 100)
-        })
-        
-        showModalBackdrop.then(() => {
-          this.modal.display = 'block'
-          setTimeout(() => {
-            this.modal.class = 'show'
-          }, 100)
+        this.$refs.loan.update_data(this.now_item)
+      },
+      classify_items: function (items) {
+        const classify = status => (
+          items.filter(item => item.status === status)
+        )
+
+        return {
+          on_sale: classify('on_sale'),
+          backed: classify('backed'),
+          expired: classify('expired')
+        }
+      },
+      sort_items: function (rule) {
+        const data_items =
+          !!this.sorted_items['on_sale']
+          ? this.sorted_items
+          : this.classify_items(this.data.data)
+        let { on_sale, backed, expired } = data_items
+
+        const reverse = () => {
+          on_sale = on_sale.reverse()
+          backed = backed.reverse()
+          expired = expired.reverse()
+        }
+
+        const sort = () => {
+          const valuePath = (() => {
+            let testItem
+            if (on_sale[0]) {
+              testItem = on_sale[0]
+            } else if (backed[0]) {
+              testItem = backed[0]
+            } else {
+              testItem = expired[0]
+            }
+
+            if (testItem['loan_detail'][rule] !== undefined) {
+              return 'loan_detail'
+            } else {
+              return 'root'
+            }
+          })()
+
+          const get_value = item => {
+            switch (valuePath) {
+              case 'loan_detail':
+                return item['loan_detail'][rule]
+              case 'root':
+                return item[rule]
+            }
+          }
+
+          const sort_array = array => {
+            return array.sort((a, b) => {
+              if (get_value(a) < get_value(b)) {
+                return 1
+              }
+              if (get_value(a) > get_value(b)) {
+                return -1
+              }
+              return 0
+            })
+          }
+
+          on_sale = sort_array(on_sale, rule)
+          backed = sort_array(backed, rule)
+          expired = sort_array(expired, rule)
+        }
+
+        const set_class = () => {
+          const $el = $(this.$refs[rule])
+          if ($el.hasClass('sort-down')) {
+            $el.removeClass('sort-down').addClass('sort-up')
+          } else {
+            $el.removeClass('sort-up').addClass('sort-down')
+          }
+          $el.siblings().removeClass('sort-down sort-up')
+        }
+
+        if (rule === this.sort_rule) {
+          reverse()
+        } else {
+          sort()
+        }
+
+        set_class()
+
+        this.sort_rule = rule
+        this.sorted_items = { on_sale, backed, expired }
+        this.now_list = this.create_now_list(this.sorted_items)
+      },
+      create_now_list: function (items) {
+        const concat_items = items => {
+          const { on_sale, backed, expired } = items
+          return on_sale.concat(backed).concat(expired)
+        }
+
+        return concat_items(items).map(item_data => {
+          return {
+            data: item_data,
+            expiration: get_expiration(item_data.expire_at)
+          }
         })
       },
-      modalHide: function (next) {
-        const hideModal = new Promise (resolve => {
-          this.modal.class = ''
-          $('body').removeClass('modal-open')
-          setTimeout(resolve, 150)
-        })
-
-        hideModal.then(() => {
-          this.modal_backdrop.class = ''
-          setTimeout(() => {
-            this.modal.display = 'none'
-            this.modal_backdrop.show = false
-            next()
-          }, 150)
-        })
+      order: function (serial) {
+        window.alert(serial)
       }
+    },
+    components: {
+      Loan,
+      Modal,
+      List
     }
   }
 </script>

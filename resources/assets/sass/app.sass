@@ -12,5 +12,51 @@
   background-color: #fff
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04)
 
-table tbody tr
-  cursor: pointer
+.table
+  th.sort,
+  tbody tr
+    cursor: pointer
+  th.sort
+    &.sort-down
+      .icon-sort-down
+        opacity: 1
+      .icon-sort-up
+        opacity: 0
+    &.sort-up
+      .icon-sort-up
+        opacity: 1
+      .icon-sort-down
+        opacity: 0
+
+.sort-icons
+  display: inline-block
+  position: relative
+  vertical-align: middle
+  margin-left: 0.5em
+.icon-sort-down,
+.icon-sort-up
+  display: block
+  position: absolute
+  left: 0
+  opacity: 0.2
+  &:before
+    content: ''
+    display: block
+    width: 0
+    height: 0
+    border-style: solid
+.icon-sort-down
+  top: 50%
+  margin-top: 1px
+  &:before
+    border-width: 5px 5px 0
+    border-color: $black transparent transparent
+.icon-sort-up
+  bottom: 50%
+  margin-bottom: 1px
+  &:before
+    border-width: 0 5px 5px
+    border-color: transparent transparent $black
+
+.modal
+  -webkit-overflow-scrolling: touch
