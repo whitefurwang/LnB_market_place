@@ -3,19 +3,14 @@
 @section('title', 'Loan')
 
 @section('content')
-  <nav class='navbar navbar-expand-lg navbar-light bg-light'>
-    <div class="navbar-collapse">
-      <div class="navbar-nav">
-        <router-link
-          to="/market-place"
-          exact
-          class='nav-item nav-link'
-          linkActiveClass='active'
-        >Market Place</router-link>
-      </div>
+  @include('includes.header')
+  <div class="container-fluid">
+    <div class="row">
+      <main class="col">
+        <router-view/>
+      </main>
     </div>
-  </nav>
-  <router-view/>
+  </div>
 @endsection
 
 @section('script')
