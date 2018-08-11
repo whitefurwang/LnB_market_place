@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class='pt-3 pb-5'>
+    <h2 class='text-center mb-3'>逛逛市集</h2>
     <List
       v-if="now_list && now_list.length"
       :now_list='now_list'
@@ -39,7 +40,7 @@
         <span>筆</span>
       </div>
     </div>
-    <div class='modal fade' id='modal' ref='modal'>
+    <div class='market-place-modal modal fade' id='modal' ref='modal'>
       <div class='modal-dialog'>
         <div class='modal-content'>
           <div slot='body' class="modal-body">
@@ -128,9 +129,8 @@
       get_data: function (page = 1, per_page = 10) {
         const self = this
         $.ajax({
-          type: 'GET',
-          url: 'https://paris.robowebtech.tw/api/market-place',
-          // url: '//localhost:3000/market-place',
+          type: myApp.apis['market-place'].type,
+          url: myApp.apis['market-place'].url,
           data: {
             page: page,
             perPage: per_page
@@ -299,10 +299,8 @@
       order: function (serial) {
         const self = this
         $.ajax({
-          type: 'POST',
-          url: 'https://paris.robowebtech.tw/api/market-place/order',
-          // type: 'GET',
-          // url: '//localhost:3000/order',
+          type: myApp.apis['order'].type,
+          url: myApp.apis['order'].url,
           data: { serial },
           dataType: 'json',
           success: function (result) {

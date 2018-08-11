@@ -1,5 +1,5 @@
 <template>
-  <table v-if="now_list && now_list.length" class='table table-hover text-center'>
+  <table v-if="now_list && now_list.length" class='table table-hover text-center market-place-table'>
     <thead class='thead-light'>
       <tr>
         <th class="sort" data-sort='apr' @click='sort_items'>
@@ -65,10 +65,15 @@
         <td class='align-middle' v-else-if="item.expiration === 'expired'">已過期</td>
         <td class='align-middle' v-else-if="item.expiration.days === 0 && item.expiration.hours === 0 && item.expiration.mins === 0">少於1分</td>
         <td class='align-middle' v-else>{{ item.expiration.days }}天 {{ item.expiration.hours }}時 {{ item.expiration.mins }}分</td>
-        <td class='align-middle' v-if="item.data.status === 'on_sale' && item.expiration !== 'expired'">
-          <button class='btn btn-outline-primary btn-block' type='button' @click.stop='order(item.data.serial)'>我要投資</button>
+        <td class='align-middle'>
+          <button
+            v-if="item.data.status === 'on_sale' && item.expiration !== 'expired'"
+            class='btn btn-outline-primary btn-block'
+            type='button'
+            @click.stop='order(item.data.serial)'
+          >我要投資</button>
+          <span v-else>--</span>
         </td>
-        <td class='align-middle' v-else>--</td>
       </router-link>
     </tbody>
   </table>

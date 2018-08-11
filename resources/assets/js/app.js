@@ -4,6 +4,21 @@ import Loan from './components/Loan'
 
 require('./bootstrap')
 
+window.myApp = window.myApp || {}
+myApp.apis = {
+  'market-place': {
+    type: 'GET',
+    // 'url': 'https://paris.robowebtech.tw/api/market-place',
+    url: '//localhost:3000/market-place'
+  },
+  'order': {
+    // type: 'POST',
+    // url: 'https://paris.robowebtech.tw/api/market-place/order'
+    type: 'GET',
+    url: '//localhost:3000/order'
+  }
+}
+
 window.Vue = require('vue')
 
 Vue.use(VueRouter)
