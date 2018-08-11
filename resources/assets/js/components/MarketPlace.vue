@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class='pt-3 pb-5'>
+    <h2 class='text-center mb-3'>逛逛市集</h2>
     <List
       v-if="now_list && now_list.length"
       :now_list='now_list'
@@ -33,13 +34,13 @@
         <b-form-select
           v-model='data.per_page'
           :value="data.per_page"
-          :options="{ '2': 2, '5': 5, '10': 10, '20': 20 }"
+          :options="{ '5': 5, '10': 10, '20': 20 }"
           @change='change_pre_page'
         />
         <span>筆</span>
       </div>
     </div>
-    <div class='modal fade' id='modal' ref='modal'>
+    <div class='market-place-modal modal fade' id='modal' ref='modal'>
       <div class='modal-dialog'>
         <div class='modal-content'>
           <div slot='body' class="modal-body">
@@ -81,8 +82,7 @@
         now_item: {},
         sort_rule: null,
         sort_reverse: false,
-        sorted_items: {},
-        errors: []
+        sorted_items: {}
       }
     },
     created () {
@@ -103,9 +103,7 @@
       })
 
       $(this.$refs['go-to-input']).on('focus', e => {
-        console.log('focus')
         const $target = $(e.target)
-        console.log($target)
         $target.on('keydown', e => {
           if (e.keyCode === 13) {
             this.go_to_page_change(Number($target[0].value))
@@ -128,40 +126,37 @@
       }
     },
     methods: {
-      get_data: function (page, per_page) {
-        axios
-          .get('//localhost:9090/market-place', {
+      get_data: function (page = 1, per_page = 10) {
+        const self = this
+        $.ajax({
+          type: myApp.apis['market-place'].type,
+          url: myApp.apis['market-place'].url,
+          data: {
             page: page,
             perPage: per_page
-          })
-          .then(res => res.data)
-          .then(market_place => {
-            const data = market_place.data
-            let classify_items
+          },
+          dataType: 'json',
+          success: function (result) {
+            const data = result
 
-            if (page) {
-              data.current_page = page
-            }
-            if (per_page) {
-              data.per_page = per_page
-            }
+            data.current_page = page
+            data.per_page = per_page
 
-            this.data = data
-            classify_items = this.classify_items(data.data)
-
-            if (this.sort_rule) {
-              this.sort_items(this.sort_rule)
-            } else {
-              this.now_list = this.create_now_list(classify_items)
-            }
-
-            this.now_list.map(item => {
+            self.data = data 
+            self.now_list = self.create_now_list(self.classify_items(data.data))
+            self.now_list.map(item => {
               set_expiration(item)
             })
-          })
-          .catch(e => {
-            this.errors.push(e)
-          })
+
+            if (self.sort_rule) {
+              self.sorted_items = {} // reset sorted_items
+              self.sort_items(self.sort_rule)
+            }
+          },
+          error: function (e) {
+            window.alert(e)
+          }
+        })
       },
       set_now_item: function (serial) {
         const item_data = search_data(
@@ -177,6 +172,13 @@
         this.$refs.loan.update_data(this.now_item)
       },
       classify_items: function (items) {
+        // items will be object type in some situation
+        // translate it to array type
+        // make sure function can to executed in correct
+        if (!Array.isArray(items)) {
+          items = Object.values(items)
+        }
+
         const classify = status => (
           items.filter(item => item.status === status)
         )
@@ -189,9 +191,9 @@
       },
       sort_items: function (e) {
         const data_items =
-          !!this.sorted_items['on_sale']
-          ? this.sorted_items
-          : this.classify_items(this.data.data)
+          Object.keys(this.sorted_items).length === 0
+          ? this.classify_items(this.data.data) // if this.sorted_items haven't setred
+          : this.sorted_items
         let { on_sale, backed, expired } = data_items
 
         const reverse = (is_change_page) => {
@@ -249,6 +251,8 @@
         }
 
         if (typeof e === 'string') {
+          // it will pass sort rule as a param
+          // while this method called by get_data function
           sort(e)
           this.sort_reverse && reverse(true)
         } else {
@@ -293,7 +297,19 @@
         })
       },
       order: function (serial) {
-        window.alert(serial)
+        const self = this
+        $.ajax({
+          type: myApp.apis['order'].type,
+          url: myApp.apis['order'].url,
+          data: { serial },
+          dataType: 'json',
+          success: function (result) {
+            self.set_serial_backed(serial)
+          },
+          error: function (e) {
+            window.alert(e)
+          }
+        })
       },
       change_page: function (page) {
         // here is a bug of this.data.per_page
@@ -302,7 +318,6 @@
         // it will comes a error message in b-pagination component
         // so now, I translate the type to number for avoid this bug
         // it should be fixed
-        // - whitefur
         this.get_data(page, this.data.per_page)
       },
       change_pre_page: function (per_page) {
@@ -328,6 +343,16 @@
         } else {
           window.alert('輸入的頁數不正確')
         }
+      },
+      set_serial_backed: function (serial) {
+        const this_serial = search_data(
+          'serial',
+          serial,
+          this.data.data
+        )
+
+        this_serial.status = 'backed'
+        this_serial.status_label = '已被下單'
       }
     },
     components: {

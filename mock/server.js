@@ -15,18 +15,27 @@ files.forEach(function (file) {
     _.extend(base, require(path.resolve(mockDir, file)))
   }
 })
+
+// To handle POST, PUT and PATCH you need to use a body-parser
+// You can use the one used by JSON Server
+server.use(jsonServer.bodyParser)
+server.use((req, res, next) => {
+  if (req.method === 'POST') {
+    console.log('post')
+    req.body.createdAt = Date.now()
+  }
+  // Continue to JSON Server router
+  next()
+})
+
 const router = jsonServer.router(base)
 server.use(router)
 
 router.render = (req, res) => {
   console.log(res.locals.data)
-  res.jsonp({
-    data: res.locals.data,
-    status: 0,
-    msg: ''
-  })
+  res.jsonp(res.locals.data)
 }
 
-server.listen(9090, () => {
+server.listen(3000, () => {
   console.log('JSON Server is running')
 })
