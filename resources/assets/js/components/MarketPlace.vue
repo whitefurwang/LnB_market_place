@@ -142,6 +142,13 @@
             data.current_page = page
             data.per_page = per_page
 
+            // items will be object type in some situation
+            // translate it to array type
+            // to make sure everything can executed in correct
+            if (!Array.isArray(data.data)) {
+              data.data = Object.values(data.data)
+            }
+
             self.data = data 
             self.now_list = self.create_now_list(self.classify_items(data.data))
             self.now_list.map(item => {
@@ -172,13 +179,6 @@
         this.$refs.loan.update_data(this.now_item)
       },
       classify_items: function (items) {
-        // items will be object type in some situation
-        // translate it to array type
-        // make sure function can to executed in correct
-        if (!Array.isArray(items)) {
-          items = Object.values(items)
-        }
-
         const classify = status => (
           items.filter(item => item.status === status)
         )
